@@ -24,6 +24,8 @@ vi.mock('../../server/utils/auth', () => ({
   isAuthEnabled: () => true,
   authUserView: async () => ({ id: 1, username: 'ada', role: 'member' }),
   setUserSession: async () => {},
+  // `<name>@mail.example` is the email of the account `<name>`.
+  signInName: async (identifier: string) => identifier.replace(/@mail\.example$/i, ''),
   verifyUser: async (_event: unknown, username: string, password: string) => {
     await new Promise<void>((resolve) => {
       const previous = auth.release;
@@ -79,6 +81,17 @@ describe('login throttle', () => {
   test('ten wrong passwords sent together try five, and refuse the rest', async () => {
     const ip = `10.0.0.${address}`;
     const statuses = await together(Array.from({ length: 10 }, () => request(ip, `ada${address}`, 'wrong')));
+    expect(statuses.filter((s) => s === 401)).toHaveLength(5);
+    expect(statuses.filter((s) => s === 429)).toHaveLength(5);
+  });
+
+  test("wrong passwords to an account's username and its email share the account's five", async () => {
+    const ip = `10.0.0.${address}`;
+    const statuses = await together(
+      Array.from({ length: 10 }, (_, i) =>
+        request(ip, i % 2 ? `ada${address}` : `Ada${address}@Mail.example`, 'wrong'),
+      ),
+    );
     expect(statuses.filter((s) => s === 401)).toHaveLength(5);
     expect(statuses.filter((s) => s === 429)).toHaveLength(5);
   });

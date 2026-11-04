@@ -1,5 +1,5 @@
 import { getDatabase } from '../../database';
-import { authUserView, verifyUser, setUserSession, isAuthEnabled } from '../../utils/auth';
+import { authUserView, verifyUser, setUserSession, isAuthEnabled, signInName } from '../../utils/auth';
 import { rateLimitClientIp, releaseRateLimit, resetRateLimit, takeRateLimitSlots } from '../../utils/rate-limit';
 import { USERNAME_MAX_LENGTH } from '#shared/project-access';
 import { z } from 'zod';
@@ -11,7 +11,7 @@ defineRouteMeta({
     tags: ['Auth'],
     summary: 'Login',
     description:
-      'Authenticates a user with username and password credentials and creates a session. Returns the user as `GET /api/auth/me` does.',
+      "Authenticates a user with a password and creates a session. `username` takes the account's username, matched exactly, or its email address, letter case ignored; a username wins over another account's email. Returns the user as `GET /api/auth/me` does.",
     security: [],
   },
 });
@@ -41,7 +41,9 @@ export default eventHandler(async (event) => {
     });
   }
 
-  const { username, password } = validation.data;
+  const { username: identifier, password } = validation.data;
+  // An email names its account's username, so the throttle below counts one account however it is named.
+  const username = await signInName(identifier);
 
   const address = rateLimitClientIp(event);
   const account = username.toLowerCase();
