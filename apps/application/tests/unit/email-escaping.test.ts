@@ -11,7 +11,11 @@ describe('email templates escape the values they interpolate', () => {
   });
 
   test('the invite email escapes who sent it', () => {
-    expect(renderInviteEmail('token', PAYLOAD).html).not.toContain(PAYLOAD);
+    expect(renderInviteEmail('token', { username: 'jsmith', invitedBy: PAYLOAD }).html).not.toContain(PAYLOAD);
+  });
+
+  test('the invite email escapes the username', () => {
+    expect(renderInviteEmail('token', { username: PAYLOAD }).html).not.toContain(PAYLOAD);
   });
 
   test('the run email escapes the reported status', () => {

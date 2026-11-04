@@ -147,18 +147,23 @@ export function renderPasswordResetEmail(token: string): { html: string; text: s
   return { html, text };
 }
 
-export function renderInviteEmail(token: string, invitedBy?: string): { html: string; text: string } {
+/** The invite email: who sent it, the username to sign in with, and the link that sets the password. */
+export function renderInviteEmail(
+  token: string,
+  { username, invitedBy }: { username: string; invitedBy?: string },
+): { html: string; text: string } {
   const url = `${siteUrl()}/reset-password?token=${encodeURIComponent(token)}&mode=invite`;
   const byLine = invitedBy
-    ? `<p style="margin:0 0 24px;color:#52525b;">You were invited by <strong>${escapeHtml(invitedBy)}</strong>. Click the button below to set your password and activate your account. This link expires in 72 hours.</p>`
-    : `<p style="margin:0 0 24px;color:#52525b;">Click the button below to set your password and activate your account. This link expires in 72 hours.</p>`;
+    ? `<p style="margin:0 0 16px;color:#52525b;">You were invited by <strong>${escapeHtml(invitedBy)}</strong>. Click the button below to set your password and activate your account. This link expires in 72 hours.</p>`
+    : `<p style="margin:0 0 16px;color:#52525b;">Click the button below to set your password and activate your account. This link expires in 72 hours.</p>`;
   const body = `
     <h2 style="margin:0 0 16px;font-size:20px;color:#18181b;">You've been invited to Piwi Dashboard</h2>
     ${byLine}
+    <p style="margin:0 0 24px;color:#52525b;">Your username is <strong>${escapeHtml(username)}</strong>: sign in with it and the password you set.</p>
     ${emailButton(url, 'Set password &amp; activate')}
     <p style="margin:24px 0 0;font-size:12px;color:#a1a1aa;">Link: <a href="${url}" style="color:#18181b;">${url}</a></p>`;
   const { html } = emailLayout("You've been invited to Piwi Dashboard", body);
-  const text = `You've been invited to Piwi Dashboard\n\nClick the link below to set your password and activate your account. This link expires in 72 hours.\n\n${url}`;
+  const text = `You've been invited to Piwi Dashboard\n\nClick the link below to set your password and activate your account. This link expires in 72 hours.\n\nYour username is ${username}: sign in with it and the password you set.\n\n${url}`;
   return { html, text };
 }
 

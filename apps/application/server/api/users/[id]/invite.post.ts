@@ -11,7 +11,7 @@ defineRouteMeta({
     tags: ['Users'],
     summary: 'Send invite email',
     description:
-      'Sends an invite email to a user with a link to set their password. Requires the user to have an email address set (400) and SMTP to be configured (503).',
+      'Sends an invite email to a user with their username and a link to set their password. Requires the user to have an email address set (400) and SMTP to be configured (503).',
     'x-required-permission': 'users:manage',
     parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }],
   },
@@ -31,7 +31,7 @@ export default eventHandler(async (event) => {
     throw apiError({ statusCode: 503, errorCode: 'SMTP_NOT_CONFIGURED', message: 'SMTP is not configured' });
 
   const token = await mintAccountToken(db, user.id, 'invite', user.email);
-  const { html, text } = renderInviteEmail(token, admin.name || admin.username);
+  const { html, text } = renderInviteEmail(token, { username: user.username, invitedBy: admin.name || admin.username });
 
   try {
     await sendEmail({ to: user.email, subject: "You've been invited to Piwi Dashboard", html, text });
