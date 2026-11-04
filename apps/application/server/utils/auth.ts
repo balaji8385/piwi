@@ -17,6 +17,7 @@ import {
 } from '#shared/permissions';
 import type { DrizzleDB } from '#shared/handlers/db';
 import { getUserAccess } from '#shared/handlers/role-bindings';
+import { findUserByEmail } from '#shared/handlers/users';
 import { getRouteRequiredPermissions } from './route-required-permission';
 import { hashToken } from './token-hash';
 import { bearerToken } from './bearer';
@@ -349,6 +350,20 @@ export async function verifyUser(event: H3Event, username: string, password: str
   }
 
   return user;
+}
+
+/**
+ * The username a sign-in names. An identifier holding an `@` is the username of the account whose username it is
+ * exactly, else of the account whose email it is (letter case ignored); any other identifier, and one no account
+ * holds, is returned as typed. A username wins over another account's email, so an account whose username is an
+ * address (a provider sign-up's) keeps signing in with it.
+ */
+export async function signInName(identifier: string): Promise<string> {
+  if (!identifier.includes('@')) return identifier;
+  const db = await getDatabase();
+  const [byUsername] = await db.select({ id: users.id }).from(users).where(eq(users.username, identifier)).limit(1);
+  if (byUsername) return identifier;
+  return (await findUserByEmail(db, identifier))?.username ?? identifier;
 }
 
 // Create a new user
