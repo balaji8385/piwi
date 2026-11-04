@@ -130,7 +130,7 @@ Signed-in users can link a provider explicitly from **Settings → Account → C
 
 Administrators manage accounts under **Settings → Users** (`/settings/users`). **Add user** creates one with a
 username, an instance role, an optional display name and email, and a password. Without one, the row's **Send invite email**
-button mails the user a link to set their own. Each row shows the user's instance role and the
+button mails them their username and a password link. Each row shows the user's instance role and the
 [groups](./project-access#groups) they belong to.
 
 An email address belongs to one account, ignoring letter case: creating or editing an account with an address another
