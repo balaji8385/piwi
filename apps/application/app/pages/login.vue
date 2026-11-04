@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { safeReturnPath } from '#shared/return-path';
 import { USERNAME_MAX_LENGTH } from '#shared/project-access';
+import { handedUsername } from '~/utils/sign-in-handoff';
 
 const { login } = useAuth();
 const router = useRouter();
@@ -113,6 +114,9 @@ const oauthProviders = computed(() => {
 
 // Check for OAuth error from callback redirect
 onMounted(() => {
+  // The username of an account whose password was just set, handed over by the set-password page.
+  const handed = handedUsername(window.history.state, USERNAME_MAX_LENGTH);
+  if (handed && !state.username) state.username = handed;
   const oauthError = route.query.error as string | undefined;
   if (oauthError) {
     const messages: Record<string, string> = {

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { ApiResponse } from '~~/types/api';
+
 const route = useRoute();
 const router = useRouter();
 const toast = useToast();
@@ -27,12 +29,16 @@ async function submit() {
 
   loading.value = true;
   try {
-    await $fetch('/api/auth/reset-password', {
-      method: 'POST',
-      body: { token: token.value, password: password.value },
+    const result = await $fetch<ApiResponse<typeof import('~~/server/api/auth/reset-password.post').default>>(
+      '/api/auth/reset-password',
+      { method: 'POST', body: { token: token.value, password: password.value } },
+    );
+    toast.add({
+      title: isInvite.value ? 'Account activated!' : 'Password reset!',
+      description: result.username ? `Sign in as ${result.username}.` : undefined,
+      color: 'success',
     });
-    toast.add({ title: isInvite.value ? 'Account activated!' : 'Password reset!', color: 'success' });
-    router.push('/login');
+    router.push({ path: '/login', state: result.username ? { username: result.username } : undefined });
   } catch (err: unknown) {
     const msg =
       err && typeof err === 'object' && 'data' in err ? (err.data as { message?: string })?.message : undefined;

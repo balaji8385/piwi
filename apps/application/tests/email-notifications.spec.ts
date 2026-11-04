@@ -314,6 +314,7 @@ test.describe.serial('User invite email', () => {
 
     const msg = await mailpit.waitForMessage((m) => m.To.some((t) => t.Address === INVITE_EMAIL));
     const detail = await mailpit.getMessage(msg.ID);
+    expect(detail.Text).toContain('Your username is invitetest');
     const linkMatch = (detail.HTML || detail.Text).match(/http[^\s"<>]+reset-password[^\s"<>]+/);
     expect(linkMatch).not.toBeNull();
 
@@ -327,6 +328,7 @@ test.describe.serial('User invite email', () => {
       password: 'InviteePassword1!',
     });
     expect(resetRes.ok).toBe(true);
+    expect((await resetRes.json()).username).toBe('invitetest');
   });
 });
 
