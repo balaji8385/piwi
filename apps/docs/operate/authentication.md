@@ -63,7 +63,7 @@ administrator first. The [one-click deploy templates](./one-click-deploy) genera
 
 ## Logging in
 
-Sign in at `/login`. A session is an encrypted cookie that lasts 7 days. It is marked `Secure`, so browser sign-in needs HTTPS, except on `localhost`. Signing out ends every session of the account, in every browser.
+Sign in at `/login` with a username or the account's email. A session is an encrypted cookie that lasts 7 days. It is marked `Secure`, so browser sign-in needs HTTPS, except on `localhost`. Signing out ends every session of the account, in every browser.
 
 ## OAuth (Google, GitHub)
 
@@ -102,14 +102,14 @@ By default any account at a configured provider can sign in. To restrict access:
 - **`PIWI_OAUTH_ALLOWED_DOMAINS`** — comma-separated email domains (e.g. `example.com,acme.org`). Only **verified** provider emails in these domains may sign in. Applies to all providers.
 - **`PIWI_OAUTH_GITHUB_ALLOWED_ORGS`** — comma-separated GitHub org logins. The user must be a member of at least one. Enabling this requests the `read:org` scope so membership (including private) can be checked.
 
-Rejected sign-ins are returned to the login page with an explanatory message.
+Rejected sign-ins return to the login page with a message.
 
 ### Account linking
 
 A first sign-in with a provider either links an existing account or creates a new one. Email addresses are compared ignoring case, so `Bob@corp.com` and `bob@corp.com` are the same address, and an address belongs to at most one account.
 
 - If a user with the same **verified** email exists (and isn't already linked to a *different* provider), the existing account is linked to the provider. Linking needs proof on both sides: the provider must assert the email is verified, **and** the local account must have verified it too (through the verification link, an accepted invite, or an earlier provider sign-in). This stops an address someone typed into their own profile from capturing another person's sign-in.
-- If the matching account has **not** verified the address, the sign-in is refused with an explanatory message instead of being linked. The account's owner signs in with its password (or accepts their invite first) and connects the provider from **Settings → Account**.
+- If the matching account has **not** verified the address, the sign-in is refused with a message, not linked. The account's owner signs in with its password (or accepts their invite first) and connects the provider from **Settings → Account**.
 - If the matching account is **already linked to a different provider**, the sign-in is refused: one provider is linked per account, so sign in with the original method instead.
 - Otherwise, a new user is created as a **Member** with no project role and no password, so it always signs in through its provider and sees nothing until it is [granted a role](./project-access#default-is-no-access). An email the provider has not verified never links an account, so GitHub accounts with no verified primary email always get a new account.
 
